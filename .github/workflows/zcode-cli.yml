@@ -1,0 +1,35 @@
+name: build-zcode-cli-linux-x64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.14.0
+
+      - name: Pin pnpm 10.33.2
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.2 --activate
+          pnpm --version
+
+      - name: Install deps (v3.17.1 lockfile 滞后，禁用 frozen)
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build CLI
+        run: pnpm --filter @zcode/cli... build
+
+      - name: Build SEA single-file binary
+        run: pnpm --filter @zcode/cli sea --target linux-x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zcode-linux-x64
+          path: apps/zcode-cli/packages/cli/dist/zcode-linux-x64
