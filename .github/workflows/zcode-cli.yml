@@ -22,8 +22,12 @@ jobs:
       - name: Install deps (v3.17.1 lockfile 滞后，禁用 frozen)
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build CLI
-        run: pnpm --filter @zcode/cli... build
+      - name: Build CLI + source-only dist
+        run: |
+          pnpm --filter @zcode/cli... build
+          # @zcode/shared 无 build 脚本，SEA 依赖其 dist，需显式 tsc
+          pnpm --filter @zcode/shared exec tsc -p tsconfig.json
+
 
       - name: Build SEA single-file binary
         run: pnpm --filter @zcode/cli sea --target linux-x64
