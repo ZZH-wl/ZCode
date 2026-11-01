@@ -22,11 +22,22 @@ jobs:
       - name: Install deps (v3.17.1 lockfile 滞后，禁用 frozen)
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build CLI + source-only dist
+      - name: Build CLI + shared + official plugins
         run: |
           pnpm --filter @zcode/cli... build
-          # @zcode/shared 无 build 脚本，SEA 依赖其 dist，需显式 tsc
+          # @zcode/shared 无 build 脚本，SEA 需要其 dist
           pnpm --filter @zcode/shared exec tsc -p tsconfig.json
+          # SEA 内置的 requiresRuntime 官方插件，都需要先 build
+          pnpm --filter @zcode/node-repl-host build
+          pnpm --filter @zcode/android-emulator-plugin build
+          pnpm --filter @zcode/ios-simulator-plugin build
+          pnpm --filter @zcode/documents-plugin build
+          pnpm --filter @zcode/pdf-plugin build
+          pnpm --filter @zcode/presentations-plugin build
+          pnpm --filter @zcode/spreadsheets-plugin build
+          pnpm --filter @zcode/browser-use-plugin build
+          pnpm --filter @zcode/zcode-site-plugin build
+
 
 
       - name: Build SEA single-file binary
